@@ -114,12 +114,14 @@ class Database(object):
         """Returns all tests in run"""
         return self.session.query(Methods) \
                            .filter(Methods.buildbot_run_id == buildbot_run) \
+                           .filter(Methods.method_type == 'test') \
                            .all()
 
     def all_violating_tests(self, buildbot_run):
         """Returns all non-unit tests (not setup, teardown)"""
         return self.session.query(Methods) \
                            .filter(Methods.method_type == 'test') \
+                           .filter(Methods.buildbot_run_id == buildbot_run) \
                            .join(Violations).all()
 
     def build_dict(self):
@@ -152,7 +154,7 @@ class Database(object):
 
 
 class Denormalized(Base):
-    __tablename__ = 'catbox_denormalized_builds'
+    __tablename__ = 'catbox_builds_denormalized'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     buildbot_run_id = Column(String, nullable=True)
