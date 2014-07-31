@@ -150,7 +150,7 @@ class DatabaseTestCase(testify.TestCase):
     def test_all_tests(self):
         db_class = Database(self.options_db)
         all_tests = db_class.all_tests(9)
-        self.assertEqual(len(all_tests), 9)
+        self.assertEqual(len(all_tests), 2)
 
     def test_violations(self):
         max_time = 9
@@ -169,10 +169,9 @@ class DatabaseTestCase(testify.TestCase):
         for test in range(1, 10):
             test_name_part = u'test' + unicode(test)
             name = "%s %s.%s" % (u'test', test_name_part, test_name_part)
+            # Only these tests have the proper id
             if test == 2 or test == 3:
                 proper_response[name] = False
-            else:
-                proper_response[name] = True
 
         db_class = Database(self.options_db)
         unittest = db_class.build_dict()

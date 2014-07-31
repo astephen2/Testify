@@ -18,7 +18,6 @@ from sqlalchemy import Enum
 from sqlalchemy import ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
 from testify import suite
-import logging
 import yaml
 
 Base = declarative_base()
@@ -114,12 +113,14 @@ class Database(object):
         """Returns all tests in run"""
         return self.session.query(Methods) \
                            .filter(Methods.buildbot_run_id == buildbot_run) \
+                           .filter(Methods.method_type == 'test') \
                            .all()
 
     def all_violating_tests(self, buildbot_run):
         """Returns all non-unit tests (not setup, teardown)"""
         return self.session.query(Methods) \
                            .filter(Methods.method_type == 'test') \
+                           .filter(Methods.buildbot_run_id == buildbot_run) \
                            .join(Violations).all()
 
     def build_dict(self):
@@ -131,10 +132,10 @@ class Database(object):
         last_time = self.last_time_of_catbox_run()
         bb_runid = self.buildbot_run_id(last_time)
 
-        all_tests = self.all_tests(bb_runid)
+        all_tests_names = self.all_tests(bb_runid)
         all_violates = self.all_violating_tests(bb_runid)
 
-        for test in all_tests:
+        for test in all_tests_names:
             #Unit until proven not
             test_name = "%s %s.%s" % (test.module,
             	test.class_name, test.method_name)
@@ -152,7 +153,7 @@ class Database(object):
 
 
 class Denormalized(Base):
-    __tablename__ = 'catbox_denormalized_builds'
+    __tablename__ = 'catbox_builds_denormalized'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     buildbot_run_id = Column(String, nullable=True)
